@@ -1,16 +1,24 @@
+const Markers = require("./markers");
+
 class Sockets {
     constructor( io ){
         this.io = io;
-
-        this.socketsEvents()
+        this.markers = new Markers();
+        this.socketsEvents();
     }
 
     socketsEvents(){
         this.io.on('connection', ( socket ) => {
-            socket.on("message-to-serve", (data) => {
-                console.log(data);
+            socket.emit("load-markers", this.markers.actives)
 
-                this.io.emit("message-from-serve", data)
+            socket.on("new-marker", (marker) => {
+                this.markers.addMarker(marker)
+                socket.broadcast.emit("new-marker", marker)
+            })
+
+            socket.on("update-marker", (marker) => {
+                this.markers.updateMarker(marker)
+                socket.broadcast.emit("update-marker", marker)
             })
         });
     }

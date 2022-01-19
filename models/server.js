@@ -3,7 +3,7 @@ const http = require("http")
 const socketio = require("socket.io")
 const path = require("path");
 const Sockets = require("./sockets");
-const cors = require("cors")
+const cors = require("cors");
 
 class Server {
     constructor(){
@@ -12,10 +12,11 @@ class Server {
 
         // http server
         this.server = http.createServer(this.app)
-
+        
         // socket configuration
         this.io = socketio(this.server)
-
+        
+        this.sockets = new Sockets(this.io)
     }
 
     socketConfiguration(){
@@ -25,6 +26,13 @@ class Server {
     middlewares(){
         this.app.use(express.static(path.resolve(__dirname, "../public")))
         this.app.use(cors())
+
+        this.app.get("/api/markers", (req, res) => {
+            res.json({
+                ok: true,
+                data: this.sockets.markers.actives
+            })
+        })
     }
 
     execute(){
